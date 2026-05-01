@@ -21,8 +21,8 @@
             <span :class="$style.sliderName">Daily ride distance</span>
             <span :class="$style.sliderValue">{{ Math.round(dailyKm) }} km</span>
           </div>
-          <input v-model.number="dailyKm" type="range" min="5" max="100" step="1" />
-          <div :class="$style.sliderHints"><span>5 km</span><span>100 km</span></div>
+          <input v-model.number="dailyKm" type="range" min="2" max="100" step="1" />
+          <div :class="$style.sliderHints"><span>2 km</span><span>100 km</span></div>
         </div>
         <div :class="$style.divider"></div>
         <div :class="$style.sliderGroup">
@@ -149,8 +149,8 @@ const EV_KM_UNIT = 10;
 const PETROL_SVC_YR = 7000;
 const EV_SVC_YR = 2000;
 
-const dailyKm = ref(30);
-const petrolPrice = ref(105);
+const dailyKm = ref(20);
+const petrolPrice = ref(107);
 const elecPrice = ref(7);
 
 const fmt = (n: number) => {
@@ -255,42 +255,53 @@ const decisionRows = computed(() => {
 
 <style module>
 .wrapper {
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  background: #fff;
+  border: 1px solid #d9eadf;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f7fbf8 48%, #ffffff 100%);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
   overflow: hidden;
 }
 
 .hero {
-  background: #0f1f0f;
+  position: relative;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(34, 197, 94, 0.35), transparent 28%),
+    linear-gradient(135deg, #102617 0%, #0b3b2e 48%, #112542 100%);
   color: #fff;
-  padding: 1.8rem 1.2rem;
+  padding: 2.2rem 1.3rem 2rem;
   text-align: center;
 }
 
 .channelTag {
   display: inline-block;
-  border: 1px solid #16a34a55;
-  color: #86efac;
+  border: 1px solid rgba(187, 247, 208, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: #bbf7d0;
   font-size: 11px;
   border-radius: 100px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   margin-bottom: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .title {
   margin: 0;
-  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.1;
 }
 
 .title span {
-  color: #86efac;
+  color: #bbf7d0;
+  display: block;
 }
 
 .subtitle {
-  color: #9ca3af;
+  color: #d1fae5;
   margin: 0.6rem auto 1rem;
   max-width: 520px;
+  line-height: 1.5;
 }
 
 .badges {
@@ -301,30 +312,34 @@ const decisionRows = computed(() => {
 }
 
 .badge {
-  border: 1px solid #ffffff33;
-  background: #ffffff1a;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 5px 11px;
   font-size: 11px;
+  font-weight: 700;
 }
 
 .main {
-  padding: 1rem;
+  padding: 1.2rem;
 }
 
 .sectionTitle {
-  margin: 0.8rem 0;
-  color: #6b7280;
+  margin: 1rem 0 0.65rem;
+  color: #475569;
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  font-weight: 800;
 }
 
 .card {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 0.8rem;
+  border: 1px solid #dbe8df;
+  border-radius: 16px;
+  padding: 1.05rem;
+  margin-bottom: 0.9rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.07);
 }
 
 .tightCard {
@@ -332,96 +347,160 @@ const decisionRows = computed(() => {
 }
 
 .sliderGroup {
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.95rem;
 }
 
 .sliderTop {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 10px;
 }
 
 .sliderName {
   font-size: 13px;
+  color: #334155;
+  font-weight: 700;
 }
 
 .sliderValue {
+  flex: 0 0 auto;
+  min-width: 74px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  padding: 5px 10px;
+  text-align: center;
   font-weight: 600;
-  color: #15803d;
+}
+
+.sliderGroup input[type='range'] {
+  width: 100%;
+  display: block;
+  height: 18px;
+  margin: 0;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+
+.sliderGroup input[type='range']::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #16a34a, #22c55e 55%, #93c5fd);
+}
+
+.sliderGroup input[type='range']::-webkit-slider-thumb {
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
+  border: 3px solid #0f172a;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.85),
+    0 5px 14px rgba(15, 23, 42, 0.28);
+  appearance: none;
+}
+
+.sliderGroup input[type='range']::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #16a34a, #22c55e 55%, #93c5fd);
+}
+
+.sliderGroup input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #0f172a;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.85),
+    0 5px 14px rgba(15, 23, 42, 0.28);
 }
 
 .sliderHints {
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: #6b7280;
+  color: #64748b;
+  margin-top: 7px;
 }
 
 .divider {
   height: 1px;
-  background: #e5e7eb;
-  margin: 0.7rem 0;
+  background: linear-gradient(90deg, transparent, #dbe8df, transparent);
+  margin: 0.8rem 0;
 }
 
 .verdict {
   border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 0.9rem;
-  margin-bottom: 0.8rem;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 0.9rem;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 }
 
 .verdictEv {
-  background: #dcfce7;
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
   border-color: #86efac;
 }
 
 .verdictPetrol {
-  background: #fee2e2;
+  background: linear-gradient(135deg, #fee2e2, #fff7ed);
   border-color: #fca5a5;
 }
 
 .verdictNeutral {
-  background: #fef3c7;
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
   border-color: #fcd34d;
 }
 
 .verdictTitle {
   font-weight: 700;
   margin-bottom: 4px;
+  color: #0f172a;
+  font-size: 1.05rem;
 }
 
 .verdictSub {
   font-size: 13px;
+  color: #334155;
+  line-height: 1.45;
 }
 
 .metrics {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 0.8rem;
+  gap: 12px;
+  margin-bottom: 0.9rem;
 }
 
 .metric {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border: 1px solid #dbe8df;
+  border-radius: 16px;
   text-align: center;
-  padding: 0.8rem;
+  padding: 0.95rem 0.8rem;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
 
 .primaryMetric {
-  border-color: #10b981;
-  background: #f0fdf4;
+  border-color: #34d399;
+  background: linear-gradient(180deg, #ecfdf5, #ffffff);
 }
 
 .metricNum {
-  font-size: 1.2rem;
+  font-size: clamp(1.15rem, 2.8vw, 1.55rem);
   font-weight: 700;
+  color: #0f172a;
 }
 
 .metricUnit,
 .metricLabel {
   font-size: 11px;
-  color: #6b7280;
+  color: #64748b;
 }
 
 .progressHeader {
@@ -433,15 +512,16 @@ const decisionRows = computed(() => {
 }
 
 .progressTrack {
-  height: 10px;
+  height: 12px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: #e2e8f0;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #16a34a, #22c55e);
+  background: linear-gradient(90deg, #16a34a, #22c55e, #38bdf8);
+  border-radius: inherit;
 }
 
 .progressNote {
@@ -463,9 +543,17 @@ const decisionRows = computed(() => {
 
 .table th,
 .table td {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid #f1f5f9;
   text-align: left;
+}
+
+.table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .table th:not(:first-child),
@@ -475,11 +563,12 @@ const decisionRows = computed(() => {
 
 .totalRow td {
   font-weight: 700;
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid #dbe8df;
+  background: #f8fafc;
 }
 
 .selectedRow {
-  background: #f0fdf4;
+  background: #ecfdf5;
 }
 
 .positive {
@@ -514,6 +603,16 @@ const decisionRows = computed(() => {
 }
 
 @media (max-width: 640px) {
+  .main {
+    padding: 0.9rem;
+  }
+
+  .sliderTop {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
   .metrics {
     grid-template-columns: 1fr 1fr;
   }
