@@ -5,7 +5,8 @@
       <div :class="$style['hamburger']" @click="toggleMenu">&#9776;</div>
     </div>
     <SIPOptions @onInvestmentTypeChange="onInvestmentTypeChange" />
-    <div>
+    <OthersCalculators v-if="investmentType === InvestmentTypes.OTHER" />
+    <div v-else>
       <div v-if="investmentType != InvestmentTypes.LUMPSUM" :class="$style.options">
         <div :class="$style.category">
           <span> {{ investmentTitle }} </span>
@@ -242,6 +243,7 @@
       </div>
     </div>
     <SIPOutput
+      v-if="investmentType !== InvestmentTypes.OTHER"
       :years="timePeriod"
       :investment="investmentValue"
       :returns="estimatedReturnsValue"
@@ -260,6 +262,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { calculateSWP, calculateReturns } from './sip-calculator';
 import SIPOutput from './sip-output.vue';
 import SIPOptions from './sip-options.vue';
+import OthersCalculators from './others-calculators.vue';
 import Slider from '@vueform/slider';
 import { InvestmentTypes } from '../constants';
 import { useMainStore } from '@/store';
@@ -352,6 +355,23 @@ const formatPrice = (price: number) => {
 };
 
 const onValueChange = () => {
+  if (investmentType.value === InvestmentTypes.OTHER) {
+    emits('update', {
+      totalInvestment: 0,
+      estimatedReturns: 0,
+      totalReturn: 0,
+      expectedReturn: 0,
+      investment: 0,
+      investmentType: investmentType.value,
+      years: 0,
+      stepup: 0,
+      swpReturnRate: 0,
+      swpWithdrawl: 0,
+      swpTenure: 0
+    });
+    return;
+  }
+
   if (investmentType.value === InvestmentTypes.SWP) {
     const { totalWithdrawals: swpWithdrawls, finalValue: swpFinal } = calculateSWP(
       investment.value,
@@ -429,6 +449,8 @@ watch(investmentType, (newValue, oldValue) => {
   } else if (newValue === InvestmentTypes.YEARLY) {
     investment.value = yearlyInvestment;
   }
+
+  onValueChange();
 });
 </script>
 

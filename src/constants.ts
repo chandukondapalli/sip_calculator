@@ -3,5 +3,6 @@ export enum InvestmentTypes {
   LUMPSUM = 'lumpsum',
   STEPUP = 'stepup',
   YEARLY = 'yearly',
-  SWP = 'swp'
+  SWP = 'swp',
+  OTHER = 'other'
 }

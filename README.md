@@ -37,3 +37,9 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## Lead Capture Setup (Chat Agent)
+
+The floating chat button (`Click to conect chandu`) posts lead details directly to this Google Form:
+
+`https://docs.google.com/forms/d/e/1FAIpQLSfdaF4IzFEpTIi9oX9-d0T1S54jPeUbms3bGmzHRYaSJC8Z1g/viewform`

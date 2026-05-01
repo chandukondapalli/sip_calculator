@@ -31,6 +31,12 @@
       >
         SIP + SWP
       </div>
+      <div
+        :class="[$style.option, investmentType === InvestmentTypes.OTHER ? $style.selected : '']"
+        @click="onInvestmentTypeChange(InvestmentTypes.OTHER)"
+      >
+        Others
+      </div>
     </div>
   </div>
 </template>

@@ -2,22 +2,26 @@
   <div :class="$style.main">
     <div :class="$style.container">
       <SipCalculator @update="onValuesUpdated($event)" :class="$style['sip-calculator']" />
-      <div :class="$style.chartContainer">
-        <Pie :data="data" :options="chartOptions" />
-      </div>
-      <div :class="$style.LineChartContainer">
-        <Bar :data="lineData" :options="barChartOptions" />
-      </div>
+      <template v-if="currentInvestmentType !== InvestmentTypes.OTHER">
+        <div :class="$style.chartContainer">
+          <Pie :data="data" :options="chartOptions" />
+        </div>
+        <div :class="$style.LineChartContainer">
+          <Bar :data="lineData" :options="barChartOptions" />
+        </div>
+      </template>
     </div>
-    <div>
+    <div v-if="currentInvestmentType !== InvestmentTypes.OTHER">
       <InvestmentTable :investment-details="investmentDetails" />
     </div>
+    <ChatAgentWidget />
   </div>
 </template>
 
 <script setup lang="ts">
 import SipCalculator from './components/sip-calculator.vue';
 import InvestmentTable from './components/investment-table.vue';
+import ChatAgentWidget from './components/chat-agent-widget.vue';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -39,8 +43,7 @@ import {
   calculateStepUpSIP,
   calculateSWP,
   calculateYearlySIP,
-  formatCurrencyValue,
-  formatPrice
+  formatCurrencyValue
 } from './components/sip-calculator';
 import { InvestmentTypes } from './constants';
 
@@ -124,7 +127,7 @@ const barChartOptions = {
   }
 };
 
-const data = ref({
+const data = ref<any>({
   labels: ['Invested', 'Est. returns'],
   datasets: [
     {
@@ -134,7 +137,7 @@ const data = ref({
   ]
 });
 
-const lineData = ref({
+const lineData = ref<any>({
   labels: [],
   datasets: [
     {
@@ -155,6 +158,7 @@ const investmentDetails = ref({
 
 const investmentValue: Ref<number[]> = ref([] as number[]);
 const expectedReturnsValues = ref([] as number[]);
+const currentInvestmentType = ref<InvestmentTypes>(InvestmentTypes.SIP);
 
 const calculateChartData = (
   totalInvestment: number,
@@ -185,9 +189,9 @@ const calculateLineData = (
   swpWithdrawl: number,
   swpTenure: number
 ) => {
-  const values: any = [];
-  const labels: any = [];
-  const investmentValues: any = [];
+  const values: number[] = [];
+  const labels: number[] = [];
+  const investmentValues: number[] = [];
   expectedReturnsValues.value = [];
   investmentValue.value = [];
 
@@ -211,7 +215,7 @@ const calculateLineData = (
     expectedReturnsValues.value.push(estimatedReturns);
     investmentValues.push(totalInvestment);
 
-    if (investmentType == InvestmentTypes.SWP) {
+    if (investmentType === InvestmentTypes.SWP) {
       const { finalValue } = calculateSWP(
         investment,
         expectedReturn,
@@ -276,6 +280,12 @@ const onValuesUpdated = (updatedData: any) => {
     swpWithdrawl,
     swpTenure
   } = updatedData;
+
+  currentInvestmentType.value = investmentType;
+
+  if (investmentType === InvestmentTypes.OTHER) {
+    return;
+  }
 
   const fieldsToCheck = [
     totalInvestment,
