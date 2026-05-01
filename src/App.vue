@@ -158,7 +158,7 @@ const investmentDetails = ref({
 
 const investmentValue: Ref<number[]> = ref([] as number[]);
 const expectedReturnsValues = ref([] as number[]);
-const currentInvestmentType = ref<InvestmentTypes>(InvestmentTypes.SIP);
+const currentInvestmentType = ref<InvestmentTypes>(InvestmentTypes.OTHER);
 
 const calculateChartData = (
   totalInvestment: number,

@@ -1,11 +1,14 @@
 <template>
   <div>
     <div style="display: flex; justify-content: space-between">
-      <h1 style="text-align: center; flex-grow: 1">SIP Calculator</h1>
+      <h1 style="text-align: center; flex-grow: 1">{{ pageTitle }}</h1>
       <div :class="$style['hamburger']" @click="toggleMenu">&#9776;</div>
     </div>
-    <SIPOptions @onInvestmentTypeChange="onInvestmentTypeChange" />
-    <OthersCalculators v-if="investmentType === InvestmentTypes.OTHER" />
+    <SIPOptions
+      @onInvestmentTypeChange="onInvestmentTypeChange"
+      @onOtherCalculatorChange="onOtherCalculatorChange"
+    />
+    <OthersCalculators v-if="investmentType === InvestmentTypes.OTHER" :active-tab="otherCalculator" />
     <div v-else>
       <div v-if="investmentType != InvestmentTypes.LUMPSUM" :class="$style.options">
         <div :class="$style.category">
@@ -289,7 +292,8 @@ const stepup = ref(10);
 const totalReturn = ref(0);
 const showInvestmentText = ref(true);
 const showLumpInvestmentText = ref(true);
-const investmentType = ref(InvestmentTypes.SIP);
+const investmentType = ref(InvestmentTypes.OTHER);
+const otherCalculator = ref<'ev' | 'home-loan'>('ev');
 const totalWithdrawals = ref(0);
 const finalValue = ref(0);
 const steupReturns = ref(0);
@@ -338,9 +342,20 @@ const investmentTitle = computed(() =>
   investmentType.value === InvestmentTypes.LUMPSUM ? 'Total Investment' : 'Monthly Investment'
 );
 
+const pageTitle = computed(() => {
+  if (investmentType.value !== InvestmentTypes.OTHER) return 'SIP Calculator';
+  return otherCalculator.value === 'ev' ? 'EV vs Petrol Calculator' : 'Home Loan Prepayment Calculator';
+});
+
 const onInvestmentTypeChange = (type: InvestmentTypes) => {
   investmentType.value = type;
   scaleInvestment();
+  onValueChange();
+};
+
+const onOtherCalculatorChange = (type: 'ev' | 'home-loan') => {
+  otherCalculator.value = type;
+  investmentType.value = InvestmentTypes.OTHER;
   onValueChange();
 };
 
