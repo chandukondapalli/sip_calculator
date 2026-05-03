@@ -343,7 +343,9 @@ const onValuesUpdated = (updatedData: any) => {
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  background-color: rgba(246, 238, 246, 0.234);
+  background:
+    linear-gradient(180deg, rgba(236, 253, 245, 0.72), rgba(248, 250, 252, 0.92) 42%),
+    rgba(246, 238, 246, 0.234);
 }
 
 .container {

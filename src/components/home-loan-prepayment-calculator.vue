@@ -1,9 +1,8 @@
 <template>
   <div :class="$style.wrapper">
     <div :class="$style.header">
-      <div :class="$style.eyebrow">Loan payoff planner</div>
       <h2>Home Loan Prepayment Calculator</h2>
-      <p>Compare your current schedule with monthly and yearly prepayment strategies.</p>
+      <p>Check how much interest and tenure you can save with regular prepayments.</p>
     </div>
 
     <div :class="$style.grid">
@@ -126,6 +125,71 @@ const toEmi = (p: number, annual: number, months: number) => {
   return (p * monthlyRate * factor) / (factor - 1);
 };
 
+const getBalanceAfterMonths = (p: number, annual: number, emi: number, elapsedMonths: number) => {
+  const monthlyRate = annual / 12 / 100;
+  let balance = p;
+
+  for (let month = 0; month < elapsedMonths && balance > 1; month += 1) {
+    const interest = balance * monthlyRate;
+    const principalPaid = Math.min(balance, Math.max(0, emi - interest));
+    balance -= principalPaid;
+  }
+
+  return Math.max(0, balance);
+};
+
+const simulateRemainingLoan = (
+  openingBalance: number,
+  annual: number,
+  emi: number,
+  maxMonths: number,
+  prepayMonthly: number,
+  prepayYearly: number,
+  monthlyStartAt: number,
+  yearlyStartAt: number
+) => {
+  const monthlyRate = annual / 12 / 100;
+  const monthlyStartMonth = Math.max(0, Math.round(monthlyStartAt));
+  const yearlyStartMonth = Math.max(0, Math.round(yearlyStartAt));
+  const firstYearlyPrepaymentMonth = yearlyStartMonth + 1;
+  let balance = Math.max(0, openingBalance);
+  let month = 0;
+  let totalPaid = 0;
+  let totalInterest = 0;
+
+  while (balance > 1 && month < Math.max(1, maxMonths)) {
+    month += 1;
+    const interest = balance * monthlyRate;
+    const regularPrincipalPaid = Math.min(balance, Math.max(0, emi - interest));
+    let extra = 0;
+
+    if (month > monthlyStartMonth) {
+      extra += Math.max(0, prepayMonthly);
+    }
+    if (
+      month >= firstYearlyPrepaymentMonth &&
+      (month - firstYearlyPrepaymentMonth) % 12 === 0
+    ) {
+      extra += Math.max(0, prepayYearly);
+    }
+
+    const extraPrincipalPaid = Math.min(Math.max(0, balance - regularPrincipalPaid), extra);
+    const principalPaid = regularPrincipalPaid + extraPrincipalPaid;
+    balance -= principalPaid;
+    totalInterest += interest;
+    totalPaid += interest + principalPaid;
+
+    if (principalPaid <= 0) break;
+  }
+
+  return {
+    tenureMonths: month,
+    totalPayment: totalPaid,
+    totalInterest,
+    remainingBalance: balance
+  };
+};
+
 const simulateLoan = (
   p: number,
   annual: number,
@@ -136,57 +200,40 @@ const simulateLoan = (
   monthlyStartAt: number,
   yearlyStartAt: number
 ): SimResult => {
-  const safeOutstandingMonths = Math.max(1, Math.round(outstandingMonths));
-  const safeTotalMonths = Math.max(safeOutstandingMonths, Math.round(totalMonths));
-  const emi = toEmi(p, annual, safeOutstandingMonths);
-  const monthlyRate = annual / 12 / 100;
-  const baseTotal = emi * safeOutstandingMonths;
-  const baseInterest = baseTotal - p;
-  const monthlyStartMonth = Math.max(0, Math.round(monthlyStartAt));
-  const yearlyStartMonth = Math.max(0, Math.round(yearlyStartAt));
-  const firstYearlyPrepaymentMonth = yearlyStartMonth + 1;
+  const safeTotalMonths = Math.max(1, Math.round(totalMonths));
+  const safeOutstandingMonths = Math.min(
+    safeTotalMonths,
+    Math.max(0, Math.round(outstandingMonths))
+  );
+  const safePrincipal = Math.max(0, p);
+  const emi = safePrincipal > 0 ? toEmi(safePrincipal, annual, safeTotalMonths) : 0;
+  const elapsedMonths = Math.max(0, safeTotalMonths - safeOutstandingMonths);
+  const openingBalance = getBalanceAfterMonths(safePrincipal, annual, emi, elapsedMonths);
+  const maxSimulationMonths = Math.max(safeTotalMonths * 2, safeOutstandingMonths + 120);
+  const base = simulateRemainingLoan(openingBalance, annual, emi, maxSimulationMonths, 0, 0, 0, 0);
+  const withPrepayment = simulateRemainingLoan(
+    openingBalance,
+    annual,
+    emi,
+    maxSimulationMonths,
+    prepayMonthly,
+    prepayYearly,
+    monthlyStartAt,
+    yearlyStartAt
+  );
 
-  let balance = p;
-  let month = 0;
-  let totalPaid = 0;
-  while (balance > 1 && month < safeOutstandingMonths * 2) {
-    month += 1;
-    const interest = balance * monthlyRate;
-    let principalPaid = emi - interest;
-    if (principalPaid > balance) principalPaid = balance;
-
-    let extra = 0;
-    if (month > monthlyStartMonth) {
-      extra += Math.max(0, prepayMonthly);
-    }
-    if (
-      month >= firstYearlyPrepaymentMonth &&
-      (month - firstYearlyPrepaymentMonth) % 12 === 0
-    ) {
-      extra += Math.max(0, prepayYearly);
-    }
-    if (extra > balance - principalPaid) {
-      extra = Math.max(0, balance - principalPaid);
-    }
-
-    balance -= principalPaid + extra;
-    totalPaid += interest + principalPaid + extra;
-  }
-
-  const newTenureMonths = month;
-  const newInterest = totalPaid - p;
   return {
     baseEmi: emi,
-    baseTotalPayment: baseTotal,
-    baseInterest,
-    baseTenureMonths: safeOutstandingMonths,
-    elapsedMonths: Math.max(0, safeTotalMonths - safeOutstandingMonths),
+    baseTotalPayment: base.totalPayment,
+    baseInterest: base.totalInterest,
+    baseTenureMonths: base.tenureMonths,
+    elapsedMonths,
     totalTenureMonths: safeTotalMonths,
-    newTotalPayment: totalPaid,
-    newInterest,
-    newTenureMonths,
-    interestSaved: Math.max(0, baseInterest - newInterest),
-    monthsSaved: Math.max(0, safeOutstandingMonths - newTenureMonths)
+    newTotalPayment: withPrepayment.totalPayment,
+    newInterest: withPrepayment.totalInterest,
+    newTenureMonths: withPrepayment.tenureMonths,
+    interestSaved: Math.max(0, base.totalInterest - withPrepayment.totalInterest),
+    monthsSaved: Math.max(0, base.tenureMonths - withPrepayment.tenureMonths)
   };
 };
 
@@ -222,80 +269,54 @@ const formatMonths = (months: number) => {
 
 <style module>
 .wrapper {
-  border: 1px solid #dbe8df;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
-  padding: 1.2rem;
-  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.1);
+  border: 1px solid #cfe7dc;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfefc 100%);
+  padding: 1rem;
 }
 
 .header {
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at 14% 12%, rgba(34, 197, 94, 0.34), transparent 28%),
-    linear-gradient(135deg, #0f2b1e, #0b3b2e 52%, #172554);
-  color: #ffffff;
-  padding: 1.4rem;
-  margin-bottom: 1rem;
-}
-
-.eyebrow {
-  display: inline-block;
-  border: 1px solid rgba(187, 247, 208, 0.36);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.11);
-  color: #bbf7d0;
-  padding: 4px 10px;
-  margin-bottom: 0.7rem;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  border-bottom: 1px solid #d9f0e3;
+  background: linear-gradient(90deg, #ecfdf5, #eff6ff);
+  margin: -1rem -1rem 1rem;
+  padding: 1rem;
+  border-radius: 12px 12px 0 0;
 }
 
 .header h2 {
   margin: 0;
-  font-size: clamp(1.35rem, 3vw, 2rem);
+  color: #064e3b;
 }
 
 .header p {
-  max-width: 620px;
-  margin: 0.5rem 0 0;
-  color: #d1fae5;
-  line-height: 1.5;
+  margin: 0.5rem 0 1rem;
+  color: #475569;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 0.8rem;
+  gap: 0.75rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  border: 1px solid #dbe8df;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.8rem;
   color: #334155;
   font-size: 13px;
-  font-weight: 700;
 }
 
 .field input {
   border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 0.58rem 0.65rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
   background: #ffffff;
-  color: #0f172a;
-  font: inherit;
 }
 
 .field input:focus {
   border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
   outline: none;
 }
 
@@ -303,26 +324,25 @@ const formatMonths = (months: number) => {
   margin-top: 1rem;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.7rem;
+  gap: 0.6rem;
 }
 
 .metric {
   border: 1px solid #dbe8df;
-  border-radius: 16px;
-  padding: 0.85rem;
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: #f8fffb;
 }
 
 .label {
   font-size: 11px;
-  color: #64748b;
+  color: #6b7280;
 }
 
 .value {
   margin-top: 0.3rem;
   color: #0f172a;
-  font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+  font-size: 1rem;
   font-weight: 700;
 }
 
@@ -333,9 +353,6 @@ const formatMonths = (months: number) => {
 .tableWrap {
   margin-top: 1rem;
   overflow-x: auto;
-  border: 1px solid #dbe8df;
-  border-radius: 16px;
-  background: #ffffff;
 }
 
 .table {
@@ -346,17 +363,18 @@ const formatMonths = (months: number) => {
 .table th,
 .table td {
   text-align: left;
-  padding: 12px 14px;
-  border-bottom: 1px solid #eef2f7;
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
   font-size: 13px;
 }
 
 .table th {
-  background: #f8fafc;
+  background: #f0fdf4;
   color: #475569;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f8fafc;
 }
 
 .table th:not(:first-child),
