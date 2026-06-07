@@ -77,6 +77,7 @@
                 <input
                   type="number"
                   v-model="lumpInvestment"
+                  max="100000000"
                   :class="$style['text-box']"
                   @blur="showLumpInvestmentText = true"
                   v-else
@@ -87,7 +88,7 @@
         </div>
         <Slider
           v-model="lumpInvestment"
-          :max="5000000"
+          :max="100000000"
           :step="investmentInterval"
           :tooltips="false"
           :lazy="false"
@@ -165,6 +166,30 @@
           v-model="timePeriod"
           :max="60"
           :step="1"
+          :tooltips="false"
+          :lazy="false"
+          @update="onValueChange()"
+        />
+      </div>
+      <div :class="$style.options">
+        <div :class="$style.category">
+          <span> Inflation Rate (%) </span>
+          <div style="display: flex; justify-content: flex-end">
+            <span v-if="inflationRate < 0" :class="$style.tooltip">
+              <i class="fas fa-exclamation-circle"></i>
+              <span :class="$style['tooltip-text']" style="left: -700%"
+                >Value must be 0 or greater</span
+              >
+            </span>
+            <div :class="$style['input-field']">
+              <input type="number" v-model="inflationRate" min="0" :class="$style['text-box']" />
+            </div>
+          </div>
+        </div>
+        <Slider
+          v-model="inflationRate"
+          :max="15"
+          :step="0.1"
           :tooltips="false"
           :lazy="false"
           @update="onValueChange()"
@@ -251,6 +276,7 @@
       :investment="investmentValue"
       :returns="estimatedReturnsValue"
       :totalReturns="totalReturnsValue"
+      :inflationAdjustedTotalReturns="inflationAdjustedTotalReturnsValue"
       :totalWithdrawls="totalWithdrawals"
       :finalValue="finalValue"
       :stepUpReturns="steupReturns"
@@ -262,7 +288,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { calculateSWP, calculateReturns } from './sip-calculator';
+import {
+  calculateInflationAdjustedValue,
+  calculateSWP,
+  calculateReturns
+} from './sip-calculator';
 import SIPOutput from './sip-output.vue';
 import SIPOptions from './sip-options.vue';
 import OthersCalculators from './others-calculators.vue';
@@ -281,10 +311,12 @@ const lumpInvestment = ref(100000);
 const investmentValue = ref(0);
 const estimatedReturnsValue = ref(0);
 const totalReturnsValue = ref(0);
+const inflationAdjustedTotalReturnsValue = ref(0);
 const swpWithdrawl = ref(6);
 const swpReturnRate = ref(10);
 const swpTenure = ref(30);
 const expectedReturn = ref(12);
+const inflationRate = ref(6);
 const timePeriod = ref(10);
 const totalInvestment = ref(0);
 const estimatedReturns = ref(0);
@@ -420,6 +452,11 @@ const onValueChange = () => {
   investmentValue.value = totalInvestedAmount;
   estimatedReturnsValue.value = finalEstimatedReturns;
   totalReturnsValue.value = finalReturns;
+  inflationAdjustedTotalReturnsValue.value = calculateInflationAdjustedValue(
+    finalReturns,
+    Math.max(0, inflationRate.value),
+    timePeriod.value
+  );
   estimatedReturns.value = finalEstimatedReturns;
   totalReturn.value = finalReturns;
 

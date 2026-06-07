@@ -1,9 +1,19 @@
 import { InvestmentTypes } from '@/constants';
 
+export const getMonthlyReturnRate = (annualReturn: number) =>
+  Math.pow(1 + annualReturn / 100, 1 / 12) - 1;
+
 export const calculateSIP = (years: number, investment: number, expectedReturn: number) => {
   const totalMonths = years * 12;
   const totalInvestment = investment * totalMonths;
-  const monthlyReturnRate = expectedReturn / 12 / 100;
+  const monthlyReturnRate = getMonthlyReturnRate(expectedReturn);
+  if (monthlyReturnRate === 0) {
+    return {
+      totalInvestment: Math.round(totalInvestment),
+      estimatedReturns: 0,
+      totalReturn: Math.round(totalInvestment)
+    };
+  }
   const totalReturn =
     investment *
     (((1 + monthlyReturnRate) ** totalMonths - 1) / monthlyReturnRate) *
@@ -33,7 +43,7 @@ export const calculateStepUpSIP = (
   annualStepUp: number,
   expectedReturn: number
 ) => {
-  const monthlyReturnRate = expectedReturn / 12 / 100;
+  const monthlyReturnRate = getMonthlyReturnRate(expectedReturn);
   let totalInvestment = 0;
   let totalReturn = 0;
 
@@ -41,8 +51,9 @@ export const calculateStepUpSIP = (
     const yearlyInvestment = investment * Math.pow(1 + annualStepUp / 100, year);
     totalInvestment += yearlyInvestment * 12;
     for (let month = 0; month < 12; month++) {
-      totalReturn +=
-        yearlyInvestment * Math.pow(1 + monthlyReturnRate, (years - year) * 12 - month);
+      totalReturn += monthlyReturnRate === 0
+        ? yearlyInvestment
+        : yearlyInvestment * Math.pow(1 + monthlyReturnRate, (years - year) * 12 - month);
     }
   }
 
@@ -56,6 +67,13 @@ export const calculateStepUpSIP = (
 export const calculateYearlySIP = (investment: number, expectedReturn: number, years: number) => {
   const rate = expectedReturn / 100;
   const totalInvestment = investment * years;
+  if (rate === 0) {
+    return {
+      totalInvestment: Math.round(totalInvestment),
+      estimatedReturns: 0,
+      totalReturn: Math.round(totalInvestment)
+    };
+  }
   const totalReturn = investment * ((Math.pow(1 + rate, years) - 1) / rate) * (1 + rate);
 
   return {
@@ -64,6 +82,12 @@ export const calculateYearlySIP = (investment: number, expectedReturn: number, y
     totalReturn: Math.round(totalReturn)
   };
 };
+
+export const calculateInflationAdjustedValue = (
+  value: number,
+  inflationRate: number,
+  years: number
+) => Math.round(value / Math.pow(1 + inflationRate / 100, years));
 
 export const calculateSWP = (
   investment: number,
@@ -79,7 +103,7 @@ export const calculateSWP = (
   let totalWithdrawals = 0;
   let finalValue = totalReturn;
 
-  for (let i = 0; i < years; i++) {
+  for (let i = 0; i < swpTenure; i++) {
     const annualWithdrawal = finalValue * (swpWithdrawlRate / 100);
     totalWithdrawals += annualWithdrawal;
     finalValue -= annualWithdrawal;

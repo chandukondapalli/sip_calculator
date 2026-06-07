@@ -16,6 +16,13 @@
         >&#8377;{{ formatCurrencyValue(totalReturns) }} ({{ formatPrice(totalReturns) }})</span
       >
     </div>
+    <div :class="$style.category">
+      Inflation adjusted wealth in {{ years }} years<span :class="$style['no-wrap']"
+        >&#8377;{{ formatCurrencyValue(inflationAdjustedTotalReturns) }} ({{
+          formatPrice(inflationAdjustedTotalReturns)
+        }})</span
+      >
+    </div>
     <div
       v-if="investmentType == InvestmentTypes.STEPUP || investmentType == InvestmentTypes.SWP"
       :class="$style.category"
@@ -64,6 +71,10 @@ defineProps({
     required: true
   },
   totalReturns: {
+    type: Number,
+    required: true
+  },
+  inflationAdjustedTotalReturns: {
     type: Number,
     required: true
   },
