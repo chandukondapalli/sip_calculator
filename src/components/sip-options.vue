@@ -74,7 +74,7 @@ const { menuOpen } = storeToRefs(useMainStore());
 
 const emits = defineEmits(['onInvestmentTypeChange', 'onOtherCalculatorChange']);
 const investmentType = ref(InvestmentTypes.OTHER);
-const otherCalculator = ref<'ev' | 'home-loan'>('ev');
+const otherCalculator = ref<'ev' | 'home-loan'>('home-loan');
 const otherMenuOpen = ref(false);
 
 const onInvestmentTypeChange = (type: InvestmentTypes) => {
