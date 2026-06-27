@@ -188,18 +188,18 @@ export const siteConfig = {
 
   // ── SOCIAL LINKS ─────────────────────────────────────────
   social: {
-    whatsapp:  'https://wa.me/919177069555',
+    whatsapp:  'https://forms.gle/EkH6AssiWStjz4Jq5',
     youtube:   'https://www.youtube.com/@PersonalFinancebyChandu',
     instagram: 'https://www.instagram.com/personalfinancebychandu?igsh=NGgxZDVrMzA3cWo3',
     linkedin:  '',
-    email:     'mailto:kondapallichandu7@gmail.com',
+    email:     'mailto:collabwithchandu@gmail.com',
   },
 
   // ── FOOTER ───────────────────────────────────────────────
   footer: {
     description: 'Helping salaried families across Hyderabad build financial clarity, protection, and long-term wealth — one conversation at a time.',
     address:     'Hyderabad, Telangana',
-    email:       'kondapallichandu7@gmail.com',
+    email:       'collabwithchandu@gmail.com',
     disclaimer:  'Mutual fund investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future returns.',
     copyrightYear: '2026',
     resources: [
