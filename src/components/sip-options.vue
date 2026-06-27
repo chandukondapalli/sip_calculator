@@ -4,62 +4,37 @@
       <div
         :class="[$style.option, investmentType === InvestmentTypes.SIP ? $style.selected : '']"
         @click="onInvestmentTypeChange(InvestmentTypes.SIP)"
-      >
-        SIP
-      </div>
+      >SIP</div>
+
       <div
         :class="[$style.option, investmentType === InvestmentTypes.LUMPSUM ? $style.selected : '']"
         @click="onInvestmentTypeChange(InvestmentTypes.LUMPSUM)"
-      >
-        Lumpsum
-      </div>
+      >Lumpsum</div>
+
       <div
         :class="[$style.option, investmentType === InvestmentTypes.STEPUP ? $style.selected : '']"
         @click="onInvestmentTypeChange(InvestmentTypes.STEPUP)"
-      >
-        Step Up SIP
-      </div>
+      >Step Up SIP</div>
+
       <div
         :class="[$style.option, investmentType === InvestmentTypes.YEARLY ? $style.selected : '']"
         @click="onInvestmentTypeChange(InvestmentTypes.YEARLY)"
-      >
-        Yearly SIP
-      </div>
+      >Yearly SIP</div>
+
       <div
         :class="[$style.option, investmentType === InvestmentTypes.SWP ? $style.selected : '']"
         @click="onInvestmentTypeChange(InvestmentTypes.SWP)"
-      >
-        SIP + SWP
-      </div>
-      <div :class="$style.dropdown">
-        <button
-          type="button"
-          :class="[$style.option, investmentType === InvestmentTypes.OTHER ? $style.selected : '']"
-          @click="toggleOtherMenu"
-        >
-          Others
-          <span :class="$style.chevron">⌄</span>
-        </button>
-        <div v-if="otherMenuOpen" :class="$style.dropdownMenu">
-          <button
-            type="button"
-            :class="[$style.dropdownItem, otherCalculator === 'ev' ? $style.activeDropdownItem : '']"
-            @click="selectOtherCalculator('ev')"
-          >
-            EV vs Petrol
-          </button>
-          <button
-            type="button"
-            :class="[
-              $style.dropdownItem,
-              otherCalculator === 'home-loan' ? $style.activeDropdownItem : ''
-            ]"
-            @click="selectOtherCalculator('home-loan')"
-          >
-            Home Loan Prepayment
-          </button>
-        </div>
-      </div>
+      >SIP + SWP</div>
+
+      <div
+        :class="[$style.option, investmentType === InvestmentTypes.OTHER && otherCalculator === 'ev' ? $style.selected : '']"
+        @click="selectOtherCalculator('ev')"
+      >EV vs Petrol</div>
+
+      <div
+        :class="[$style.option, investmentType === InvestmentTypes.OTHER && otherCalculator === 'home-loan' ? $style.selected : '']"
+        @click="selectOtherCalculator('home-loan')"
+      >Home Loan</div>
     </div>
   </div>
 </template>
@@ -73,27 +48,18 @@ import { storeToRefs } from 'pinia';
 const { menuOpen } = storeToRefs(useMainStore());
 
 const emits = defineEmits(['onInvestmentTypeChange', 'onOtherCalculatorChange']);
-const investmentType = ref(InvestmentTypes.OTHER);
+const investmentType = ref(InvestmentTypes.SIP);
 const otherCalculator = ref<'ev' | 'home-loan'>('home-loan');
-const otherMenuOpen = ref(false);
 
 const onInvestmentTypeChange = (type: InvestmentTypes) => {
   investmentType.value = type;
-  otherMenuOpen.value = false;
   emits('onInvestmentTypeChange', type);
   menuOpen.value = false;
-};
-
-const toggleOtherMenu = () => {
-  otherMenuOpen.value = !otherMenuOpen.value;
-  investmentType.value = InvestmentTypes.OTHER;
-  emits('onInvestmentTypeChange', InvestmentTypes.OTHER);
 };
 
 const selectOtherCalculator = (type: 'ev' | 'home-loan') => {
   otherCalculator.value = type;
   investmentType.value = InvestmentTypes.OTHER;
-  otherMenuOpen.value = false;
   emits('onInvestmentTypeChange', InvestmentTypes.OTHER);
   emits('onOtherCalculatorChange', type);
   menuOpen.value = false;
@@ -105,12 +71,25 @@ const selectOtherCalculator = (type: 'ev' | 'home-loan') => {
   position: relative;
   z-index: 30;
   display: flex;
-  justify-content: center;
   flex-direction: row;
-  margin: 1rem;
-  overflow: visible;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 1rem 0 0.75rem;
   scrollbar-width: thin;
-  flex-wrap: wrap;
+  scrollbar-color: #10b981 #e6f4ee;
+}
+
+.sip-options::-webkit-scrollbar {
+  height: 4px;
+}
+.sip-options::-webkit-scrollbar-track {
+  background: #e6f4ee;
+  border-radius: 2px;
+}
+.sip-options::-webkit-scrollbar-thumb {
+  background: #10b981;
+  border-radius: 2px;
 }
 
 .option {
@@ -118,101 +97,40 @@ const selectOtherCalculator = (type: 'ev' | 'home-loan') => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 15px;
-  flex: 0 0 100px;
+  padding: 10px 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
   text-align: center;
-  border: 2px solid #fff;
-  border-radius: 4px;
-  box-shadow: 0px 1px 1px 0px #0000001a;
-  margin-right: 10px;
-  margin-bottom: 5px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #3a5248;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.dropdown {
-  position: relative;
-  margin-right: 10px;
-  margin-bottom: 5px;
-}
-
-.dropdown .option {
-  margin: 0;
-}
-
-.chevron {
-  margin-left: 6px;
-  font-size: 14px;
-  line-height: 1;
-}
-
-.dropdownMenu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
-  z-index: 100;
-  width: 210px;
-  border: 1px solid #dbe8df;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
-  padding: 0.35rem;
-}
-
-.dropdownItem {
-  width: 100%;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: #334155;
-  padding: 0.65rem 0.75rem;
-  text-align: left;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.dropdownItem:hover,
-.activeDropdownItem {
-  background: #ecfdf5;
-  color: #047857;
+.option:hover {
+  border-color: #10b981;
+  color: #10b981;
 }
 
 .selected {
-  background-color: #10b981;
+  background-color: #0b6e4f;
   color: white;
+  border-color: #0b6e4f;
 }
 
 @media (max-width: 768px) {
   .sip-options {
     display: none;
-    flex-direction: column;
   }
 
   .sip-options.open {
     display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .option {
-    flex: 1 1 auto;
-    width: 80%;
-  }
-
-  .dropdown {
-    width: 80%;
-    margin-right: 0;
-  }
-
-  .dropdown .option {
-    width: 100%;
-  }
-
-  .dropdownMenu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    width: 100%;
-    margin-top: 0.45rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 }
 </style>

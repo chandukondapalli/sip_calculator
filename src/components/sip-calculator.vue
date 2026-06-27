@@ -305,8 +305,8 @@ const { menuOpen } = storeToRefs(useMainStore());
 
 const emits = defineEmits(['update']);
 
-const investment = ref(25000);
-const sliderValue = ref(25000);
+const investment = ref(50000);
+const sliderValue = ref(50000);
 const lumpInvestment = ref(100000);
 const investmentValue = ref(0);
 const estimatedReturnsValue = ref(0);
@@ -317,14 +317,14 @@ const swpReturnRate = ref(10);
 const swpTenure = ref(30);
 const expectedReturn = ref(12);
 const inflationRate = ref(6);
-const timePeriod = ref(10);
+const timePeriod = ref(25);
 const totalInvestment = ref(0);
 const estimatedReturns = ref(0);
 const stepup = ref(10);
 const totalReturn = ref(0);
 const showInvestmentText = ref(true);
 const showLumpInvestmentText = ref(true);
-const investmentType = ref(InvestmentTypes.OTHER);
+const investmentType = ref(InvestmentTypes.SIP);
 const otherCalculator = ref<'ev' | 'home-loan'>('home-loan');
 const totalWithdrawals = ref(0);
 const finalValue = ref(0);
@@ -476,10 +476,10 @@ const onValueChange = () => {
   });
 };
 
-let sipInvestment = 25000;
-let LumpsumInvestment = 25000;
-let stepInvestment = 25000;
-let yearlyInvestment = 25000;
+let sipInvestment = 50000;
+let LumpsumInvestment = 100000;
+let stepInvestment = 50000;
+let yearlyInvestment = 50000;
 
 watch(investmentType, (newValue, oldValue) => {
   if (oldValue === InvestmentTypes.SIP || oldValue === InvestmentTypes.SWP) {
