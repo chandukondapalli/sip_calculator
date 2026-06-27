@@ -311,7 +311,7 @@
             :key="r.label"
             class="footer-link"
             href="#"
-            @click.prevent="r.isCalc ? $emit('goto-calc') : scrollToId(r.href)"
+            @click.prevent="'isCalc' in r ? $emit('goto-calc') : scrollToId(r.href)"
           >{{ r.label }}</a>
         </div>
 

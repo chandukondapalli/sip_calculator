@@ -16,7 +16,7 @@
             v-for="link in cfg.nav.links"
             :key="link.label"
             class="nav-link"
-            @click="link.isCalc ? (activePage = 'calculator') : scrollTo(link.href)"
+            @click="'isCalc' in link ? (activePage = 'calculator') : scrollTo(link.href)"
           >{{ link.label }}</button>
         </nav>
 
@@ -38,7 +38,7 @@
           v-for="link in cfg.nav.links"
           :key="link.label"
           class="mobile-nav-link"
-          @click="link.isCalc ? (activePage = 'calculator', mobileOpen = false) : (scrollTo(link.href), mobileOpen = false)"
+          @click="'isCalc' in link ? (activePage = 'calculator', mobileOpen = false) : (scrollTo(link.href), mobileOpen = false)"
         >{{ link.label }}</button>
         <a :href="cfg.nav.loginLink" target="_blank" class="btn-login mobile-cta">{{ cfg.nav.loginText }}</a>
         <a :href="cfg.nav.ctaLink"  target="_blank" class="btn-gold-pill mobile-cta">{{ cfg.nav.ctaText }}</a>
